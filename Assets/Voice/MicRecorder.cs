@@ -25,14 +25,14 @@ public class MicRecorder : MonoBehaviour
         savePath = Path.Combine(Application.dataPath, "Resources/recordings");
         Directory.CreateDirectory(savePath);
     }
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-            StartRecording();
+    // void Update()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.Space))
+    //         StartRecording();
 
-        if (Input.GetKeyUp(KeyCode.Space))
-            StopRecording();
-    }
+    //     if (Input.GetKeyUp(KeyCode.Space))
+    //         StopRecording();
+    // }
 
 
     public void StartRecording()

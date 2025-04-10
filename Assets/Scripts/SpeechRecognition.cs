@@ -1,60 +1,106 @@
 using UnityEngine;
 using UnityEngine.Windows.Speech;
-using UnityEngine.UI;
 using TMPro;
-
+using System.Collections;
+using System.Text;
 
 public class SpeechRecognition : MonoBehaviour
 {
     private DictationRecognizer dictationRecognizer;
-    public TMP_Text userSpeechDisplay;   // e.g., user input
-    public TMP_Text aiResponseDisplay;   // e.g., AI response output
+    private StringBuilder resultBuffer = new StringBuilder();
     private GroqManager groqManager;
+
+    public TMP_Text userSpeechDisplay;   // Shows final user input
+    public TMP_Text aiResponseDisplay;   // Shows AI response
+    public float typingSpeed = 0.02f;
+
+    private bool isRecording = false;
+
     void Start()
     {
-        // Initialize DictationRecognizer
-        dictationRecognizer = new DictationRecognizer();
         groqManager = FindFirstObjectByType<GroqManager>();
-        // Subscribe to DictationRecognizer events
+
+        dictationRecognizer = new DictationRecognizer();
         dictationRecognizer.DictationResult += OnDictationResult;
         dictationRecognizer.DictationHypothesis += OnDictationHypothesis;
         dictationRecognizer.DictationComplete += OnDictationComplete;
         dictationRecognizer.DictationError += OnDictationError;
-
-        // Start the DictationRecognizer
-        dictationRecognizer.Start();
     }
 
-    private async void OnDictationResult(string text, ConfidenceLevel confidence)
+    void Update()
     {
-        userSpeechDisplay.text = text;
-
-        if (groqManager != null)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            string response = await groqManager.SendMessageToGroq(text);
-            aiResponseDisplay.text = response;
+            resultBuffer.Clear();
+            userSpeechDisplay.text = "";
+            Debug.Log("🎙️ Mic started");
+            isRecording = true;
+
+            if (dictationRecognizer.Status != SpeechSystemStatus.Running)
+                dictationRecognizer.Start();
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space))
+        {
+            Debug.Log("🛑 Mic released, finalizing...");
+            isRecording = false;
+
+            if (dictationRecognizer.Status == SpeechSystemStatus.Running)
+                dictationRecognizer.Stop();
         }
     }
-    private void OnDictationHypothesis(string text)
+
+    private void OnDictationResult(string text, ConfidenceLevel confidence)
     {
-        Debug.Log($"Dictation hypothesis: {text}");
-        // Optionally, update UI to show the hypothesis
+        resultBuffer.Append(text + " ");
+        userSpeechDisplay.text = resultBuffer.ToString();
     }
 
-    private void OnDictationComplete(DictationCompletionCause cause)
+    private async void OnDictationComplete(DictationCompletionCause cause)
     {
-        if (cause != DictationCompletionCause.Complete)
-            Debug.LogError($"Dictation completed unsuccessfully: {cause}");
+        Debug.Log($"Dictation completed: {cause}");
+
+        if (isRecording)
+        {
+            // Auto-restart if still holding space
+            Debug.Log("🔁 Restarting due to silence...");
+            dictationRecognizer.Start();
+        }
+        else
+        {
+            string finalText = resultBuffer.ToString().Trim();
+            if (!string.IsNullOrEmpty(finalText))
+            {
+                Debug.Log("📤 Sending to Groq: " + finalText);
+                string response = await groqManager.SendMessageToGroq(finalText);
+                StartCoroutine(TypeText(response));
+            }
+        }
+    }
+
+    private void OnDictationHypothesis(string text)
+    {
+        // Optional live preview, you can show this elsewhere
+        Debug.Log($"🧠 Hypothesis: {text}");
     }
 
     private void OnDictationError(string error, int hresult)
     {
-        Debug.LogError($"Dictation error: {error}; HResult = {hresult}");
+        Debug.LogError($"❌ Dictation error: {error}; HResult = {hresult}");
+    }
+
+    IEnumerator TypeText(string response)
+    {
+        aiResponseDisplay.text = "";
+        foreach (char letter in response.ToCharArray())
+        {
+            aiResponseDisplay.text += letter;
+            yield return new WaitForSeconds(typingSpeed);
+        }
     }
 
     void OnDestroy()
     {
-        // Clean up
         if (dictationRecognizer != null)
         {
             dictationRecognizer.Stop();

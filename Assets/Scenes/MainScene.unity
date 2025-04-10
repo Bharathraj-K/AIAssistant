@@ -828,10 +828,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 40
+  m_fontSize: 20
   m_fontSizeBase: 40
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 20
   m_fontSizeMax: 20
   m_fontStyle: 0
@@ -1235,6 +1235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   userSpeechDisplay: {fileID: 1819065332}
   aiResponseDisplay: {fileID: 631769319}
+  typingSpeed: 0.0001
 --- !u!114 &1010412059
 MonoBehaviour:
   m_ObjectHideFlags: 0
