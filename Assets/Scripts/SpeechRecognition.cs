@@ -44,6 +44,7 @@ public class SpeechRecognition : MonoBehaviour
             isRecording = true;
 
             if (dictationRecognizer.Status != SpeechSystemStatus.Running){
+                //controlling sphere and bubble
                 micSphere.ShowAndPulse();
                 responseBubble.disable();
                 dictationRecognizer.Start();
@@ -77,6 +78,7 @@ public class SpeechRecognition : MonoBehaviour
             userSpeechDisplay.text = "";
             isMicActive = true;
             if (dictationRecognizer.Status != SpeechSystemStatus.Running){
+                //controlling sphere and bubble 
                 micSphere.ShowAndPulse();
                 responseBubble.disable();
                 dictationRecognizer.Start();
@@ -104,6 +106,7 @@ public class SpeechRecognition : MonoBehaviour
 
     private void OnDictationComplete(DictationCompletionCause cause)
     {
+        //hide sphere
         micSphere.HideSmoothly();
         Debug.Log($"Dictation completed: {cause}");
 
@@ -138,6 +141,7 @@ public class SpeechRecognition : MonoBehaviour
         if (groqManager != null)
         {
             string response = await groqManager.SendMessageToGroq(finalText);
+            //show bubble
             responseBubble.ShowBubble(response);
         }
     }
