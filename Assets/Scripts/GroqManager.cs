@@ -8,7 +8,7 @@ using Newtonsoft.Json.Linq;
 public class GroqManager : MonoBehaviour
 {
     private string apiKey = "";
-    private string keyFileName = "groq.key";
+    private string keyFileName = "groq_key.txt";
     private string apiUrl = "https://api.groq.com/openai/v1/chat/completions";
 
     void Awake()
@@ -36,7 +36,7 @@ public class GroqManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(apiKey))
         {
-            return $"❌ No API key found.\n\nTo use AI, please create a file named `groq.key` with your API key and place it here:\n{Application.persistentDataPath}";
+            return $"❌ No API key found.\n\nTo use AI, please create a file named `groq_key.txt` with your API key and place it here:\n{Application.persistentDataPath}";
         }
 
         using (HttpClient client = new HttpClient())
@@ -46,7 +46,7 @@ public class GroqManager : MonoBehaviour
 
             var data = new
             {
-                model = "mixtral-8x7b-32768",
+                model = "llama3-8b-8192",
                 messages = new[] {
                     new { role = "user", content = userMessage }
                 },
