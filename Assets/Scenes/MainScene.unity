@@ -1235,6 +1235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   userSpeechDisplay: {fileID: 1819065332}
   aiResponseDisplay: {fileID: 631769319}
+  micButtonText: {fileID: 1622625897}
   typingSpeed: 0.0001
 --- !u!114 &1010412059
 MonoBehaviour:
@@ -1564,7 +1565,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Button
+  m_text: ClickToSpeak
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a623d78abd189bb43be18bd6284b23ec, type: 2}
   m_sharedMaterial: {fileID: 7772914198845009023, guid: a623d78abd189bb43be18bd6284b23ec, type: 2}
@@ -1591,8 +1592,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 18
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 0
@@ -1934,7 +1935,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1832674940}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1010412058}
+        m_TargetAssemblyTypeName: SpeechRecognition, Assembly-CSharp
+        m_MethodName: OnMicToggle
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1832674940
 MonoBehaviour:
   m_ObjectHideFlags: 0
