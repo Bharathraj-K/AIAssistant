@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 public class SpeechRecognition : MonoBehaviour
 {
+    public ResponseBubble responseBubble; 
+
+    public SphereMicReaction micSphere; 
+
     private DictationRecognizer dictationRecognizer;
     private StringBuilder resultBuffer = new StringBuilder();
     private GroqManager groqManager;
@@ -14,7 +18,7 @@ public class SpeechRecognition : MonoBehaviour
     public TMP_Text userSpeechDisplay;
     public TMP_Text aiResponseDisplay;
     public TMP_Text micButtonText; 
-    public float typingSpeed = 0.02f;
+    // public float typingSpeed = 0.02f;
     private bool isMicActive = false;
     private bool isRecording = false;
 
@@ -31,6 +35,7 @@ public class SpeechRecognition : MonoBehaviour
 
     void Update()
     {
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
             resultBuffer.Clear();
@@ -38,8 +43,11 @@ public class SpeechRecognition : MonoBehaviour
             Debug.Log("🎙️ Mic started");
             isRecording = true;
 
-            if (dictationRecognizer.Status != SpeechSystemStatus.Running)
+            if (dictationRecognizer.Status != SpeechSystemStatus.Running){
+                micSphere.ShowAndPulse();
+                responseBubble.disable();
                 dictationRecognizer.Start();
+            }
         }
 
         if (Input.GetKeyUp(KeyCode.Space))
@@ -68,14 +76,18 @@ public class SpeechRecognition : MonoBehaviour
             resultBuffer.Clear();
             userSpeechDisplay.text = "";
             isMicActive = true;
-            if (dictationRecognizer.Status != SpeechSystemStatus.Running)
+            if (dictationRecognizer.Status != SpeechSystemStatus.Running){
+                micSphere.ShowAndPulse();
+                responseBubble.disable();
                 dictationRecognizer.Start();
+            }
             Debug.Log("🎙️ Mic ON");
         }
     }
 
     private void OnDictationResult(string text, ConfidenceLevel confidence)
     {
+        
         resultBuffer.Append(text + " ");
         userSpeechDisplay.text = resultBuffer.ToString();
     }
@@ -92,6 +104,7 @@ public class SpeechRecognition : MonoBehaviour
 
     private void OnDictationComplete(DictationCompletionCause cause)
     {
+        micSphere.HideSmoothly();
         Debug.Log($"Dictation completed: {cause}");
 
         if (isRecording)
@@ -125,19 +138,19 @@ public class SpeechRecognition : MonoBehaviour
         if (groqManager != null)
         {
             string response = await groqManager.SendMessageToGroq(finalText);
-            StartCoroutine(TypeText(response));
+            responseBubble.ShowBubble(response);
         }
     }
 
-    IEnumerator TypeText(string response)
-    {
-        aiResponseDisplay.text = "";
-        foreach (char letter in response.ToCharArray())
-        {
-            aiResponseDisplay.text += letter;
-            yield return new WaitForSeconds(typingSpeed);
-        }
-    }
+    // IEnumerator TypeText(string response)
+    // {
+    //     aiResponseDisplay.text = "";
+    //     foreach (char letter in response.ToCharArray())
+    //     {
+    //         aiResponseDisplay.text += letter;
+    //         yield return new WaitForSeconds(typingSpeed);
+    //     }
+    // }
 
     void OnDestroy()
     {
