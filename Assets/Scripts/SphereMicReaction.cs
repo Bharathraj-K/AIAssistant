@@ -1,14 +1,15 @@
 using UnityEngine;
 using System.Collections;
+
 public class SphereMicReaction : MonoBehaviour
 {
-    public float pulseScale = 1.2f;
-    public float pulseSpeed = 2f;
+    public float targetScale = 10f;        // The final size it should grow to
+    public float growSpeed = 2f;           // Speed of growth
     public float fadeDuration = 0.5f;
-    public CanvasGroup canvasGroup; // For UI fade (if using UI Image)
+    public CanvasGroup canvasGroup;
 
     private Vector3 originalScale;
-    private bool isPulsing = false;
+    private bool isGrowing = false;
 
     void Start()
     {
@@ -18,25 +19,24 @@ public class SphereMicReaction : MonoBehaviour
 
     void Update()
     {
-        if (isPulsing)
+        if (isGrowing)
         {
-            float scale = 10 * Mathf.Abs(Mathf.Sin(Time.time * pulseSpeed) * 0.1f);
-            transform.localScale = new Vector3(scale, scale, scale);
+            transform.localScale = Vector3.Lerp(transform.localScale, new Vector3(targetScale, targetScale, targetScale), Time.deltaTime * growSpeed);
         }
     }
 
-    public void ShowAndPulse()
+    public void ShowAndGrow()
     {
         StopAllCoroutines();
         gameObject.SetActive(true);
         transform.localScale = originalScale;
         if (canvasGroup) canvasGroup.alpha = 1f;
-        isPulsing = true;
+        isGrowing = true;
     }
 
     public void HideSmoothly()
     {
-        isPulsing = false;
+        isGrowing = false;
         StartCoroutine(FadeAndShrink());
     }
 

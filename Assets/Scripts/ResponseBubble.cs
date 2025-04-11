@@ -36,13 +36,13 @@ public class ResponseBubble : MonoBehaviour
             yield return null;
         }
 
-        // responseText.text = text;
-        // Typing effect
-        foreach (char c in text)
-        {
-            responseText.text += c;
-            yield return new WaitForSeconds(typingSpeed);
-        }
+        responseText.text = text;
+        // // Typing effect
+        // foreach (char c in text)
+        // {
+        //     responseText.text += c;
+        //     yield return new WaitForSeconds(typingSpeed);
+        // }
     }
 
     public void disable(){

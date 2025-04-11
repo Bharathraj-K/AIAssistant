@@ -22,6 +22,8 @@ public class SpeechRecognition : MonoBehaviour
     private bool isMicActive = false;
     private bool isRecording = false;
 
+
+
     void Start()
     {
         groqManager = FindFirstObjectByType<GroqManager>();
@@ -34,32 +36,33 @@ public class SpeechRecognition : MonoBehaviour
     }
 
     void Update()
+{
+    if (Input.GetKeyUp(KeyCode.DownArrow))
     {
+        resultBuffer.Clear();
+        userSpeechDisplay.text = "";
+        Debug.Log("🎙️ Mic started");
+        isRecording = true;
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (dictationRecognizer.Status != SpeechSystemStatus.Running)
         {
-            resultBuffer.Clear();
-            userSpeechDisplay.text = "";
-            Debug.Log("🎙️ Mic started");
-            isRecording = true;
-
-            if (dictationRecognizer.Status != SpeechSystemStatus.Running){
-                //controlling sphere and bubble
-                micSphere.ShowAndPulse();
-                responseBubble.disable();
-                dictationRecognizer.Start();
-            }
-        }
-
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            Debug.Log("🛑 Mic released, finalizing...");
-            isRecording = false;
-
-            if (dictationRecognizer.Status == SpeechSystemStatus.Running)
-                dictationRecognizer.Stop();
+            micSphere.ShowAndGrow();
+            responseBubble.disable();
+            dictationRecognizer.Start();
         }
     }
+
+    if (Input.GetKeyDown(KeyCode.DownArrow))
+    {
+        Debug.Log("🛑 Mic released , finalizing...");
+        isRecording = false;
+
+        if (dictationRecognizer.Status == SpeechSystemStatus.Running)
+            dictationRecognizer.Stop();
+    }
+}
+
+
 
     public void OnMicToggle()
     {
@@ -79,11 +82,24 @@ public class SpeechRecognition : MonoBehaviour
             isMicActive = true;
             if (dictationRecognizer.Status != SpeechSystemStatus.Running){
                 //controlling sphere and bubble 
-                micSphere.ShowAndPulse();
+                micSphere.ShowAndGrow();
                 responseBubble.disable();
                 dictationRecognizer.Start();
             }
             Debug.Log("🎙️ Mic ON");
+        }
+    }
+
+    async public void PromptByText(string text){
+        if (text != null)
+        {
+            micSphere.HideSmoothly();
+            if (groqManager != null)
+            {
+                string response = await groqManager.SendMessageToGroq(text);
+                //show bubble
+                responseBubble.ShowBubble(response);
+            }
         }
     }
 
@@ -106,9 +122,15 @@ public class SpeechRecognition : MonoBehaviour
 
     private void OnDictationComplete(DictationCompletionCause cause)
     {
-        //hide sphere
         micSphere.HideSmoothly();
         Debug.Log($"Dictation completed: {cause}");
+
+        // If it was caused by silence/timeout
+        if (cause != DictationCompletionCause.Complete)
+        {
+            micButtonText.text = "ClickToSpeak";
+            isMicActive = false;
+        }
 
         if (isRecording)
         {
@@ -121,6 +143,7 @@ public class SpeechRecognition : MonoBehaviour
         }
     }
 
+
     private async Task ProcessUserInputAfterDelay()
     {
         await Task.Delay(750);
@@ -129,7 +152,7 @@ public class SpeechRecognition : MonoBehaviour
 
         if (string.IsNullOrEmpty(finalText))
         {
-            userSpeechDisplay.text = "Couldn’t get that.";
+            userSpeechDisplay.text = "Hmmm...All Silence";
             aiResponseDisplay.text = "";
             Debug.Log("❓ No audio captured.");
             return;
